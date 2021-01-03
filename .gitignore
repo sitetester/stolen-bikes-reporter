@@ -36,3 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 db/stolen_bikes.sqlite
+bike_images

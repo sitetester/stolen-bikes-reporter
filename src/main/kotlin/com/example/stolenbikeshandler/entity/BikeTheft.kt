@@ -32,7 +32,7 @@ data class BikeTheft(
     var citizenId: Int,
 
     // image of bike
-    // var image: Blob? = null,
+    var image: String? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     // officer in charge of the case

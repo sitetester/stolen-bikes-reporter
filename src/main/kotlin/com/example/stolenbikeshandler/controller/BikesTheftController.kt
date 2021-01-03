@@ -3,12 +3,12 @@ package com.example.stolenbikeshandler.controller
 import com.example.stolenbikeshandler.entity.BikeTheft
 import com.example.stolenbikeshandler.entity.PoliceAvailability
 import com.example.stolenbikeshandler.entity.PoliceOfficer
+import com.example.stolenbikeshandler.helper.FileUploadHelper
 import com.example.stolenbikeshandler.repository.BikeTheftsRepository
 import com.example.stolenbikeshandler.repository.PoliceOfficerRepository
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.util.StringUtils
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDateTime
 
 @RestController
@@ -17,6 +17,29 @@ class BikesTheftController(
     private val bikeTheftsRepository: BikeTheftsRepository,
     private val policeOfficerRepository: PoliceOfficerRepository
 ) {
+
+    @PostMapping("/upload-bike-image/{id}")
+    fun uploadBikeImage(
+        @PathVariable("id") id: Long,
+        @RequestParam("image") multipartFile: MultipartFile
+    ): Any {
+
+        val savedBikeTheft = bikeTheftsRepository.findById(id)
+        if (!savedBikeTheft.isPresent) {
+            return ErrorMsg("No bike theft found for given id")
+        }
+
+        val bikeTheft = savedBikeTheft.get()
+
+        val fileName: String = StringUtils.cleanPath(multipartFile.originalFilename!!)
+        val uploadDir = "bike_images/" + bikeTheft.id
+        FileUploadHelper().saveFile(uploadDir, fileName, multipartFile)
+
+        bikeTheft.image = fileName
+        bikeTheftsRepository.save(bikeTheft)
+
+        return SuccessMsg()
+    }
 
     @PostMapping("/report")
     fun reportStolenBike(@RequestBody bikeTheft: BikeTheft): Any {
